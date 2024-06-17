@@ -2,69 +2,43 @@
   stdenv,
   lib,
   makeWrapper,
-  bash,
+  waybar,
 }:
 ############
 # Packages #
-#########################################################################
-let
-  iconPath = "icon.png";
-  name = "Exemple Application";
-  comment = "Exemple Application";
-in
-# --------------------------------------------------------------------- #
+#######################################################################
 stdenv.mkDerivation (finalAttrs: {
-  pname = "exemple";
-  version = "24.05-15-06-2024";
-  ## ----------------------------------------------------------------- ##
+  pname = "global-fullscreen";
+  version = "24.05-13-06-2024";
   src = ./src; 
-  ## ----------------------------------------------------------------- ##
+  # ----------------------------------------------------------------- #
   nativeBuildInputs = [ makeWrapper ];
-  ## ----------------------------------------------------------------- ##
   prePatch = ''
     patchShebangs . ;
-
-    substituteInPlace exemple \
-      --replace-fail "exemple-2" "${placeholder "out"}/bin/exemple-2"
   '';
-  ## ----------------------------------------------------------------- ##
+  # ----------------------------------------------------------------- #
   installPhase = ''
     runHook preInstall
 
     mkdir -p $out/bin/ $out/Applications/
     cp -r ./ $out/Applications/${finalAttrs.pname}/
-
     install -Dm 755 ${finalAttrs.pname} $out/bin/${finalAttrs.pname}
-    install -Dm 755 exemple-2 $out/bin/exemple-2
-
-    echo -e "[Desktop Entry]\n" \
-      "Type=Application\n" \
-      "Name=${name}\n" \
-      "Comment=${comment}\n" \
-      "Icon=$out/Applications/${finalAttrs.pname}/${iconPath}\n" \
-      "Exec=$out/bin/${finalAttrs.pname}\n" \
-      "Terminal=false" > ./${finalAttrs.pname}.desktop
-
-    install -D ${finalAttrs.pname}.desktop \
-      $out/share/applications/${finalAttrs.pname}.desktop
 
     runHook postInstall
   '';
-  ## ----------------------------------------------------------------- ##
+  # ----------------------------------------------------------------- #
   postFixup = ''
-    wrapProgram $out/bin/exemple-2 \
-      --prefix PATH : ${lib.makeBinPath [
-        bash
-      ]}
+    wrapProgram $out/bin/${finalAttrs.pname} \
+      --prefix PATH : ${lib.makeBinPath [ waybar ]}
   '';
-  ## ----------------------------------------------------------------- ##
+  # ----------------------------------------------------------------- #
   meta = {
-    description = comment;
-    homepage = "https://github.com/RevoluNix/pkgs-template/";
+    description = "CLI backup/sync manager";
     maintainers = with lib.maintainers; [ pikatsuto ];
-    licenses = lib.licenses.lgpl2;
+    licenses = lib.licenses.lgpl;
     platforms = lib.platforms.linux;
     mainProgram = finalAttrs.pname;
   };
   #######################################################################
 })
+

@@ -1,1 +1,1 @@
-# pkgs-template
+# global-fullscreen
